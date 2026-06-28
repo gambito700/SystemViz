@@ -9,6 +9,60 @@ const UIController = (() => {
   let onSelectPreset = null;
   let onToggleSettings = null;
 
+  function extractAuthor(name) {
+    const match = name.match(/^([^\-]+?)(?:\s*[-–—]|\s*$)/);
+    if (!match) return 'Other';
+    let author = match[1].replace(/[&+]/g, ',').replace(/\s+/g, ' ').trim();
+    const parts = author.split(',').map(s => s.trim()).filter(Boolean);
+    if (parts.length > 1) return 'Colaboraciones';
+    if (parts.length === 1 && parts[0]) return parts[0];
+    return 'Otros';
+  }
+
+  function getAuthorGroups(filter) {
+    const all = PresetLoader.getAll();
+    const groups = {};
+    const lower = filter ? filter.toLowerCase() : '';
+    all.forEach(p => {
+      if (lower && !p.name.toLowerCase().includes(lower)) return;
+      const author = extractAuthor(p.name);
+      if (!groups[author]) groups[author] = [];
+      groups[author].push(p);
+    });
+    const sorted = Object.keys(groups).sort((a, b) => {
+      if (a === 'Colaboraciones') return 1;
+      if (b === 'Colaboraciones') return -1;
+      return a.localeCompare(b);
+    });
+    return sorted.map(a => ({ author: a, presets: groups[a] }));
+  }
+
+  function rebuildDropdown() {
+    const select = document.getElementById('preset-list');
+    const search = document.getElementById('preset-search');
+    const countEl = document.getElementById('preset-count');
+    
+    if (countEl) {
+      const total = PresetLoader.count();
+      countEl.textContent = total > 0 ? total + ' presets' : '';
+    }
+    if (!select) return;
+
+    while (select.firstChild) select.removeChild(select.firstChild);
+    const groups = getAuthorGroups(search ? search.value : '');
+    groups.forEach(g => {
+      const optgroup = document.createElement('optgroup');
+      optgroup.label = g.author;
+      g.presets.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.name;
+        opt.textContent = p.name.replace(g.author + ' - ', '');
+        optgroup.appendChild(opt);
+      });
+      select.appendChild(optgroup);
+    });
+  }
+
   function init() {
     const welcomeScreen = document.getElementById('welcome-screen');
     const btnStart = document.getElementById('btn-start');
@@ -33,55 +87,6 @@ const UIController = (() => {
     const select = document.getElementById('preset-list');
     const search = document.getElementById('preset-search');
 
-    function extractAuthor(name) {
-      const match = name.match(/^([^\-]+?)(?:\s*[-–—]|\s*$)/);
-      if (!match) return 'Other';
-      let author = match[1].replace(/[&+]/g, ',').replace(/\s+/g, ' ').trim();
-      const parts = author.split(',').map(s => s.trim()).filter(Boolean);
-      if (parts.length > 1) return 'Colaboraciones';
-      if (parts.length === 1 && parts[0]) return parts[0];
-      return 'Otros';
-    }
-
-    function getAuthorGroups(filter) {
-      const all = PresetLoader.getAll();
-      const groups = {};
-      const lower = filter ? filter.toLowerCase() : '';
-      all.forEach(p => {
-        if (lower && !p.name.toLowerCase().includes(lower)) return;
-        const author = extractAuthor(p.name);
-        if (!groups[author]) groups[author] = [];
-        groups[author].push(p);
-      });
-      const sorted = Object.keys(groups).sort((a, b) => {
-        if (a === 'Colaboraciones') return 1;
-        if (b === 'Colaboraciones') return -1;
-        return a.localeCompare(b);
-      });
-      return sorted.map(a => ({ author: a, presets: groups[a] }));
-    }
-
-    function rebuildDropdown() {
-      const countEl = document.getElementById('preset-count');
-      if (countEl) {
-        const total = PresetLoader.count();
-        countEl.textContent = total > 0 ? total + ' presets' : '';
-      }
-      while (select.firstChild) select.removeChild(select.firstChild);
-      const groups = getAuthorGroups(search ? search.value : '');
-      groups.forEach(g => {
-        const optgroup = document.createElement('optgroup');
-        optgroup.label = g.author;
-        g.presets.forEach(p => {
-          const opt = document.createElement('option');
-          opt.value = p.name;
-          opt.textContent = p.name.replace(g.author + ' - ', '');
-          optgroup.appendChild(opt);
-        });
-        select.appendChild(optgroup);
-      });
-    }
-
     rebuildDropdown();
 
     let searchTimeout;
@@ -92,15 +97,17 @@ const UIController = (() => {
       });
     }
 
-    select.addEventListener('change', () => {
-      if (onSelectPreset) onSelectPreset(select.value);
-    });
+    if (select) {
+      select.addEventListener('change', () => {
+        if (onSelectPreset) onSelectPreset(select.value);
+      });
+    }
 
     document.addEventListener('keydown', (e) => {
-      if (!welcomeScreen.classList.contains('hidden')) {
+      if (welcomeScreen && !welcomeScreen.classList.contains('hidden')) {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          btnStart.click();
+          if (btnStart) btnStart.click();
         }
         return;
       }
