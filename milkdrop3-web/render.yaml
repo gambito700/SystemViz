@@ -3,7 +3,7 @@ services:
     name: systemviz
     env: docker
     region: frankfurt
-    dockerfilePath: ./milkdrop3-web/Dockerfile
+    dockerfilePath: ./Dockerfile
     healthCheckPath: /
     envVars:
       - key: DJANGO_SECRET_KEY
