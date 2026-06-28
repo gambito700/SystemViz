@@ -154,17 +154,27 @@
       UIController.showError('Error al crear el contexto de audio. Recarga la página e intenta de nuevo.');
       return;
     }
-    PresetLoader.init();
-    UIController.rebuildPresetList();
+    try {
+      PresetLoader.init();
+      UIController.rebuildPresetList();
+    } catch (err) {
+      console.error('PresetLoader error:', err);
+      UIController.showError('Error al cargar presets: ' + err.message);
+    }
     boot();
     startWithMic();
   });
 
   if (!window.isButterchurnSupported) {
-    const bc = butterchurn.default || butterchurn;
-    if (typeof bc !== 'undefined' && bc.isSupported) {
-      window.isButterchurnSupported = bc.isSupported();
-    } else {
+    try {
+      const bc = butterchurn.default || butterchurn;
+      if (typeof bc !== 'undefined' && bc.isSupported) {
+        window.isButterchurnSupported = bc.isSupported();
+      } else {
+        const testCanvas = document.createElement('canvas');
+        window.isButterchurnSupported = !!testCanvas.getContext('webgl2');
+      }
+    } catch (_) {
       try {
         const testCanvas = document.createElement('canvas');
         window.isButterchurnSupported = !!testCanvas.getContext('webgl2');
