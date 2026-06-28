@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: systemviz
+    env: docker
+    region: frankfurt
+    dockerfilePath: ./milkdrop3-web/Dockerfile
+    healthCheckPath: /
+    envVars:
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DJANGO_ALLOWED_HOSTS
+        value: ".onrender.com,localhost"
+      - key: PORT
+        value: "8000"
