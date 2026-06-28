@@ -1,4 +1,5 @@
 (function () {
+  try {
   const canvas = document.getElementById('visualizer');
   let visualizer = null;
   let running = false;
@@ -146,7 +147,10 @@
 
   UIController.init();
 
-  document.addEventListener('appstart', () => {
+  var _appStarted = false;
+  document.addEventListener('appstart', function() {
+    if (_appStarted) return;
+    _appStarted = true;
     try {
       AudioCapture.getContext();
     } catch (err) {
@@ -164,6 +168,11 @@
     boot();
     startWithMic();
   });
+
+  if (window.__appReady) {
+    window.__appReady = false;
+    document.dispatchEvent(new CustomEvent('appstart'));
+  }
 
   if (!window.isButterchurnSupported) {
     try {
@@ -190,5 +199,8 @@
       ws.querySelector('#welcome-title').textContent = 'WEBGL2 NO SOPORTADO';
       ws.querySelector('#welcome-sub').textContent = 'Usa Chrome, Firefox, Edge, o Safari 15+';
     }
+  }
+  } catch (e) {
+    console.error('app.js fatal:', e);
   }
 })();

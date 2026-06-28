@@ -399,6 +399,20 @@
   <div id="error-message"></div>
 
   <!-- SCRIPTS -->
+  <script>
+  (function(){
+    var btn = document.getElementById('btn-start');
+    var ws = document.getElementById('welcome-screen');
+    if (btn && ws) {
+      btn.addEventListener('click', function() {
+        ws.classList.add('hidden');
+        setTimeout(function() { ws.style.display = 'none'; }, 400);
+        window.__appReady = true;
+        document.dispatchEvent(new CustomEvent('appstart'));
+      });
+    }
+  })();
+  </script>
   <script src="{% static 'js/butterchurn.min.js' %}"></script>
   <script src="{% static 'js/butterchurnPresets.min.js' %}"></script>
   <script src="{% static 'js/audioCapture.js' %}"></script>

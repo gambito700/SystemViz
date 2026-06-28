@@ -13,12 +13,6 @@ const UIController = (() => {
     const welcomeScreen = document.getElementById('welcome-screen');
     const btnStart = document.getElementById('btn-start');
 
-    btnStart.addEventListener('click', () => {
-      welcomeScreen.classList.add('hidden');
-      setTimeout(() => { welcomeScreen.style.display = 'none'; }, 400);
-      document.dispatchEvent(new CustomEvent('appstart'));
-    });
-
     bindButton('btn-mic', onMicStart);
     bindButton('btn-loopback', onLoopbackStart);
     bindButton('btn-file', () => {
