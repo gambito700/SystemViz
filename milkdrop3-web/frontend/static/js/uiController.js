@@ -62,6 +62,11 @@ const UIController = (() => {
     }
 
     function rebuildDropdown() {
+      const countEl = document.getElementById('preset-count');
+      if (countEl) {
+        const total = PresetLoader.count();
+        countEl.textContent = total > 0 ? total + ' presets' : '';
+      }
       while (select.firstChild) select.removeChild(select.firstChild);
       const groups = getAuthorGroups(search ? search.value : '');
       groups.forEach(g => {

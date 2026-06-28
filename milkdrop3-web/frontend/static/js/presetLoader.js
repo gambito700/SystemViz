@@ -7,12 +7,27 @@ const PresetLoader = (() => {
     if (presetList) {
       allPresets = presetList;
     } else {
-      allPresets = butterchurnPresets.getPresets();
+      try {
+        allPresets = butterchurnPresets.getPresets();
+      } catch (e) {
+        console.error('PresetLoader: butterchurnPresets.getPresets() failed:', e);
+        allPresets = null;
+      }
     }
-    const keys = Object.keys(allPresets).sort((a, b) =>
-      a.localeCompare(b, undefined, { sensitivity: 'base' })
-    );
-    presets = keys.map(key => ({ name: key, data: allPresets[key] }));
+    if (!allPresets) {
+      presets = [];
+      currentIndex = 0;
+      return;
+    }
+    if (Array.isArray(allPresets)) {
+      presets = allPresets.map(p => ({ name: p.name, data: p.json_data }));
+      presets.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+    } else {
+      const keys = Object.keys(allPresets).sort((a, b) =>
+        a.localeCompare(b, undefined, { sensitivity: 'base' })
+      );
+      presets = keys.map(key => ({ name: key, data: allPresets[key] }));
+    }
     currentIndex = 0;
   }
 
@@ -20,10 +35,12 @@ const PresetLoader = (() => {
     try {
       const res = await fetch('/api/presets/');
       if (!res.ok) throw new Error('API error');
-      return await res.json();
+      const list = await res.json();
+      init(list);
+      return list;
     } catch (err) {
-      console.error('Preset API failed, falling back to butterchurnPresets:', err);
-      return butterchurnPresets.getPresets();
+      console.error('Preset API failed:', err);
+      return [];
     }
   }
 

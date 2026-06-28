@@ -148,7 +148,7 @@
   UIController.init();
 
   var _appStarted = false;
-  document.addEventListener('appstart', function() {
+  document.addEventListener('appstart', async function() {
     if (_appStarted) return;
     _appStarted = true;
     try {
@@ -160,6 +160,10 @@
     }
     try {
       PresetLoader.init();
+      if (PresetLoader.count() === 0) {
+        console.log('appstart: no local presets, trying API...');
+        await PresetLoader.loadFromApi();
+      }
       UIController.rebuildPresetList();
     } catch (err) {
       console.error('PresetLoader error:', err);

@@ -590,6 +590,14 @@ html, body {
   transition: color 0.3s;
 }
 
+#preset-count {
+  margin-left: 8px;
+  font-size: 10px;
+  color: var(--text-muted);
+  opacity: 0.5;
+  white-space: nowrap;
+}
+
 /* =============================================================
    ERROR TOAST
    ============================================================= */
