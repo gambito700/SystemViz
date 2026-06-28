@@ -155,6 +155,7 @@
       return;
     }
     PresetLoader.init();
+    UIController.rebuildPresetList();
     boot();
     startWithMic();
   });

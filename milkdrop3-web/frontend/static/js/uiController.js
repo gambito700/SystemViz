@@ -166,6 +166,7 @@ const UIController = (() => {
     setPresetName,
     setSourceButton,
     showError,
+    rebuildPresetList: rebuildDropdown,
     on: (events) => {
       if (events.prevPreset) onPrevPreset = events.prevPreset;
       if (events.nextPreset) onNextPreset = events.nextPreset;
